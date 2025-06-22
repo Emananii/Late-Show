@@ -11,14 +11,13 @@ class Episode(db.Model, SerializerMixin):
     date = db.Column(db.Date, nullable=False)
     number = db.Column(db.Integer, nullable=False)
 
-    # Relationship to Appearance
-    appearances = relationship(
-        "Appearance",
-        back_populates="episode",
-        cascade="all, delete-orphan"
+    appearances = db.relationship(
+        'Appearance',
+        back_populates='episode',
+        cascade='all, delete-orphan',
+        passive_deletes=True
     )
 
-    # Prevent recursion in serialization
     serialize_rules = ('-appearances.episode',)
 
 
@@ -29,10 +28,11 @@ class Guest(db.Model, SerializerMixin):
     name = db.Column(db.String(100), nullable=False)
     occupation = db.Column(db.String(100), nullable=False)
 
-    appearances = relationship(
-        "Appearance",
-        back_populates="guest",
-        cascade="all, delete-orphan"
+    appearances = db.relationship(
+        'Appearance',
+        back_populates='guest',
+        cascade='all, delete-orphan',
+        passive_deletes=True
     )
 
     serialize_rules = ('-appearances.guest',)
@@ -44,12 +44,20 @@ class Appearance(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
 
-    episode_id = db.Column(db.Integer, db.ForeignKey('episodes.id'), nullable=False)
-    guest_id = db.Column(db.Integer, db.ForeignKey('guests.id'), nullable=False)
+    episode_id = db.Column(
+        db.Integer,
+        db.ForeignKey('episodes.id', ondelete='CASCADE'),
+        nullable=False
+    )
 
-    # Bidirectional relationship
-    episode = relationship("Episode", back_populates="appearances")
-    guest = relationship("Guest", back_populates="appearances")
+    guest_id = db.Column(
+        db.Integer,
+        db.ForeignKey('guests.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
+    episode = db.relationship("Episode", back_populates="appearances")
+    guest = db.relationship("Guest", back_populates="appearances")
 
     serialize_rules = ('-episode.appearances', '-guest.appearances')
 

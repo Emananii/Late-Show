@@ -4,6 +4,7 @@ from .models import db, Episode, Guest, Appearance
 
 api = Blueprint("api", __name__)
 
+
 @api.route('/episodes', methods=['GET'])
 def get_episodes():
     episodes = Episode.query.all()
@@ -50,6 +51,23 @@ def get_guests():
     } for guest in guests]), 200
 
 
+@api.route('/episodes/<int:id>', methods=['DELETE'])
+def delete_episode(id):
+    episode = Episode.query.get(id)
+
+    if episode is None:
+        return jsonify({"error": "Episode not found"}), 404
+
+    try:
+        db.session.delete(episode)
+        db.session.commit()
+        return jsonify({"message": f"Episode {id} deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Could not delete episode", "details": str(e)}), 500
+
+
 @api.route('/appearances', methods=['POST'])
 def create_appearance():
     data = request.get_json()
@@ -77,7 +95,6 @@ def create_appearance():
     if errors:
         return jsonify({"errors": errors}), 400
 
-   
     try:
         new_appearance = Appearance(
             rating=rating,
@@ -88,7 +105,6 @@ def create_appearance():
         db.session.add(new_appearance)
         db.session.commit()
 
-       
         return jsonify({
             "id": new_appearance.id,
             "rating": new_appearance.rating,
