@@ -63,7 +63,7 @@ A Flask-based backend application for managing episodes, guests, and their appea
 7. **Run the Server**
 
 ```
-   Flask Run
+   flask run
 ```
 
 ## Dependencies
