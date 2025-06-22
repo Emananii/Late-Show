@@ -6,9 +6,9 @@ A Flask-based backend application for managing episodes, guests, and their appea
 
 ```
 ├── app/
-├── init.py
-├── models.py
-├── routes.py
+   ├── init.py
+   ├── models.py
+   ├── routes.py
 ├── migrations/
 ├── data/
 ├── seed.csv
