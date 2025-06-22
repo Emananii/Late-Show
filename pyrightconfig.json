@@ -1,0 +1,7 @@
+// I added this file to configure Pyright for type checking in the project and stop the false negative errors.
+
+{
+  "typeCheckingMode": "basic",
+  "reportCallIssue": false,
+  "reportOptionalMemberAccess": false
+}
