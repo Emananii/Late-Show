@@ -3,7 +3,7 @@
 A Flask-based backend application for managing episodes, guests, and their appearances on a late-night talk show.
 
 ## Project Structure
-
+```
 ├── app/
 ├── init.py
 ├── models.py
@@ -14,6 +14,7 @@ A Flask-based backend application for managing episodes, guests, and their appea
 ├── seed.py
 ├── requirements.txt
 ├── README.md
+```
 
 ## Setup Instructions
 
