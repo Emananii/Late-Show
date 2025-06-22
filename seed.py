@@ -21,7 +21,7 @@ def seed_database():
             reader = csv.DictReader(csvfile)
 
             for row in reader:
-                # Parse the episode date
+                
                 raw_date = row['Show'].strip()
                 try:
                     episode_date = datetime.strptime(raw_date, "%m/%d/%y").date()
@@ -29,17 +29,15 @@ def seed_database():
                     print(f"Skipping invalid date: {raw_date}")
                     continue
 
-                # Ensure episode uniqueness by date
                 if episode_date not in seen_dates:
                     episode = Episode(date=episode_date, number=episode_number)
                     db.session.add(episode)
-                    db.session.flush()  # Get the ID
+                    db.session.flush()
                     episode_number += 1
                     seen_dates.add(episode_date)
                 else:
                     episode = Episode.query.filter_by(date=episode_date).first()
 
-                # Handle guest
                 guest_name = row['Raw_Guest_List'].strip()
                 guest_occupation = row['GoogleKnowlege_Occupation'].strip()
 

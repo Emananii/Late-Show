@@ -22,7 +22,7 @@ A Flask-based backend application for managing episodes, guests, and their appea
 1. **Clone the repository**
 
 ```
-   git clone <repository-url>
+   git clone https://github.com/Emananii/Late-Show.git
    cd Late-Show
 ```
 
