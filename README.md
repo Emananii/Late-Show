@@ -11,7 +11,7 @@ A Flask-based backend application for managing episodes, guests, and their appea
    ├── routes.py
 ├── migrations/
 ├── data/
-├── seed.csv
+   ├── seed.csv
 ├── seed.py
 ├── requirements.txt
 ├── README.md
