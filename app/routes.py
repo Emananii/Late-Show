@@ -5,69 +5,57 @@ from .models import db, Episode, Guest, Appearance
 api = Blueprint("api", __name__)
 
 
+# GET /episodes — list all episodes
 @api.route('/episodes', methods=['GET'])
 def get_episodes():
     episodes = Episode.query.all()
-    return jsonify([{
-        "id": episode.id,
-        "date": episode.date.strftime('%-m/%-d/%y'),
-        "number": episode.number
-    } for episode in episodes]), 200
+    return jsonify([e.to_dict(include_appearances=False) for e in episodes]), 200
 
 
+# GET /episodes/<id> — episode details with appearances and nested guest info
 @api.route('/episodes/<int:id>', methods=['GET'])
 def get_episode_by_id(id):
     episode = Episode.query.get(id)
-    if episode is None:
+    if not episode:
         return jsonify({"error": "Episode not found"}), 404
 
-    return jsonify({
-        "id": episode.id,
-        "date": episode.date.strftime('%-m/%-d/%y'),
-        "number": episode.number,
-        "appearances": [
-            {
-                "id": appearance.id,
-                "rating": appearance.rating,
-                "guest_id": appearance.guest_id,
-                "episode_id": appearance.episode_id,
-                "guest": {
-                    "id": appearance.guest.id,
-                    "name": appearance.guest.name,
-                    "occupation": appearance.guest.occupation
-                }
-            } for appearance in episode.appearances
-        ]
-    }), 200
+    return jsonify(episode.to_dict(include_appearances=True)), 200
 
 
+# GET /guests — list all guests
 @api.route('/guests', methods=['GET'])
 def get_guests():
     guests = Guest.query.all()
-    return jsonify([{
-        "id": guest.id,
-        "name": guest.name,
-        "occupation": guest.occupation
-    } for guest in guests]), 200
+    return jsonify([g.to_dict() for g in guests]), 200
 
 
+# DELETE /episodes/<id>
 @api.route('/episodes/<int:id>', methods=['DELETE'])
 def delete_episode(id):
     episode = Episode.query.get(id)
 
-    if episode is None:
+    if not episode:
         return jsonify({"error": "Episode not found"}), 404
+
+    deleted_data = episode.to_dict(include_appearances=False)
 
     try:
         db.session.delete(episode)
         db.session.commit()
-        return jsonify({"message": f"Episode {id} deleted successfully"}), 200
+        return jsonify({
+            "message": f"Episode {id} deleted successfully",
+            "deleted_episode": deleted_data
+        }), 200
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "Could not delete episode", "details": str(e)}), 500
+        return jsonify({
+            "error": "Could not delete episode",
+            "details": str(e)
+        }), 500
 
 
+# POST /appearances — create a new appearance
 @api.route('/appearances', methods=['POST'])
 def create_appearance():
     data = request.get_json()
@@ -78,7 +66,7 @@ def create_appearance():
 
     errors = []
 
-    if not all([rating, episode_id, guest_id]):
+    if rating is None or episode_id is None or guest_id is None:
         errors.append("All fields (rating, episode_id, guest_id) are required")
 
     if not isinstance(rating, int) or not (1 <= rating <= 5):
@@ -105,22 +93,7 @@ def create_appearance():
         db.session.add(new_appearance)
         db.session.commit()
 
-        return jsonify({
-            "id": new_appearance.id,
-            "rating": new_appearance.rating,
-            "guest_id": new_appearance.guest_id,
-            "episode_id": new_appearance.episode_id,
-            "episode": {
-                "id": episode.id,
-                "date": episode.date.strftime('%-m/%-d/%y'),
-                "number": episode.number
-            },
-            "guest": {
-                "id": guest.id,
-                "name": guest.name,
-                "occupation": guest.occupation
-            }
-        }), 201
+        return jsonify(new_appearance.to_dict()), 201
 
     except IntegrityError:
         db.session.rollback()
